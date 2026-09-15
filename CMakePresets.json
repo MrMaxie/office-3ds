@@ -1,0 +1,95 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "host-debug",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_TESTING": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "host-tools",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "OFF",
+        "OFFICE_3DS_BUILD_CODEGEN": "ON",
+        "OFFICE_3DS_BUILD_DEMO_SERVER": "OFF",
+        "OFFICE_3DS_BUILD_DEMO_PRODUCT": "OFF",
+        "OFFICE_3DS_BUILD_BRIDGE_HOST": "OFF",
+        "OFFICE_3DS_BUILD_3DS_APP": "OFF"
+      }
+    },
+    {
+      "name": "3ds-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_TOOLCHAIN_FILE": "$env{DEVKITPRO}/cmake/3DS.cmake",
+        "BUILD_TESTING": "OFF",
+        "OFFICE_3DS_BUILD_CODEGEN": "OFF",
+        "OFFICE_3DS_BUILD_DEMO_SERVER": "OFF",
+        "OFFICE_3DS_BUILD_BRIDGE_HOST": "OFF",
+        "OFFICE_3DS_BUILD_DEMO_PRODUCT": "ON",
+        "OFFICE_3DS_BUILD_3DS_APP": "ON",
+        "OFFICE_3DS_CODEGEN_EXECUTABLE": "/workspace/build/host-tools/bin/office_3ds_product_codegen"
+      }
+    },
+    {
+      "name": "3ds-debug",
+      "inherits": "3ds-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "3ds-release",
+      "inherits": "3ds-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "host-debug",
+      "configurePreset": "host-debug"
+    },
+    {
+      "name": "host-tools",
+      "configurePreset": "host-tools",
+      "targets": [
+        "office_3ds_product_codegen"
+      ]
+    },
+    {
+      "name": "3ds-debug",
+      "configurePreset": "3ds-debug"
+    },
+    {
+      "name": "3ds-release",
+      "configurePreset": "3ds-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "host-debug",
+      "configurePreset": "host-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

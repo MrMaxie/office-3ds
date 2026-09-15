@@ -1,0 +1,20 @@
+schema: spec-driven
+
+context: |
+  office-3ds is a product-neutral C++17 dashboard platform for Nintendo 3DS.
+  Product packages supply identity, presentation, backend operations, assets,
+  local values, and an optional C++ adapter. Lua executes only in a native
+  host generator. The local demo backend is a developer reference, not a
+  production service.
+
+rules:
+  proposal:
+    - State developer and product-user audiences and explicit non-goals.
+    - Keep credentials, private integrations, workstation paths, and operator diagnostics out of public artifacts.
+  design:
+    - Keep product adapters token-free and keep target runtimes free of Lua.
+    - Define ownership and lifetime for network, graphics, audio, and stored credential resources.
+  specs:
+    - Write testable SHALL requirements with recovery scenarios.
+  tasks:
+    - Name the native, container, unit, generation, and Azahar verification required.

@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  host:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Configure
+        run: cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build/ci
+      - name: Test
+        run: ctest --test-dir build/ci --output-on-failure
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Build demo image
+        run: docker build --file Dockerfile.demo --tag office-3ds-demo:ci .
+      - name: Smoke demo image
+        run: |
+          docker run --detach --name office-3ds-demo-ci --publish 127.0.0.1:19034:8080 office-3ds-demo:ci
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:19034/health | grep --quiet '"status":"ok"'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs office-3ds-demo-ci
+          exit 1

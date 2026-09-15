@@ -1,0 +1,6 @@
+.git
+.local
+build
+dist
+*.sqlite3
+demo-token.txt

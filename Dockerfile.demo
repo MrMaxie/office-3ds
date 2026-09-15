@@ -1,0 +1,29 @@
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS build
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates cmake g++ git ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /source
+COPY . .
+RUN cmake -S . -B /build -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_TESTING=OFF \
+      -DOFFICE_3DS_BUILD_DEMO_SERVER=ON \
+    && cmake --build /build --target office_3ds_demo_server
+
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime
+
+RUN groupadd --system office3ds \
+    && useradd --system --gid office3ds --home-dir /data office3ds \
+    && mkdir /data \
+    && chown office3ds:office3ds /data
+
+COPY --from=build /build/office_3ds_demo_server /usr/local/bin/office_3ds_demo_server
+
+USER office3ds
+VOLUME ["/data"]
+EXPOSE 8080
+
+ENTRYPOINT ["office_3ds_demo_server"]
+CMD ["serve", "--database", "/data/office-3ds-demo.sqlite3", "--bind", "0.0.0.0", "--port", "8080"]
