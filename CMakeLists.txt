@@ -77,6 +77,11 @@ if(OFFICE_3DS_BUILD_DEMO_SERVER OR OFFICE_3DS_BUILD_BRIDGE_HOST)
     FetchContent_MakeAvailable(nlohmann_json)
   endif()
   if(NOT TARGET httplib::httplib)
+    # Keep the public host build independent of ambient zstd packages. Some
+    # distributions expose a partial zstd CMake package without the target
+    # name expected by cpp-httplib, which otherwise breaks configuration.
+    set(HTTPLIB_USE_ZSTD_IF_AVAILABLE OFF CACHE BOOL
+      "Disable optional cpp-httplib zstd support" FORCE)
     FetchContent_Declare(
       cpp_httplib
       GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
